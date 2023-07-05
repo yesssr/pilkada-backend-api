@@ -1,7 +1,9 @@
 import { genSaltSync, hashSync, compare } from "bcrypt";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
 import dotenv from "dotenv";
+import slug from "slug";
 dotenv.config();
 
 export function hashPass(password: string) {
@@ -55,4 +57,18 @@ export function pagination(total: number, start: number, end: number) {
     per_page: length,
     total_entries: total,
   };
+}
+
+export function nameToSlug(string: string) {
+  const options = {
+    replacement: "-", // replace spaces with replacement character, defaults to `-`
+    remove: undefined, // remove characters that match regex, defaults to `undefined`
+    lower: true, // convert to lower case, defaults to `false`
+    strict: false, // strip special characters except replacement, defaults to `false`
+    locale: "id", // language code of the locale to use
+    trim: true, // trim leading and trailing replacement chars, defaults to `true`
+  };
+
+  const slugName = slug(string + "-" + uuidv4());
+  return slugName;
 }
