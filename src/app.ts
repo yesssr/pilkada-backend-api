@@ -1,11 +1,13 @@
 import { Model } from "objection";
 import express from "express";
+import cors from "cors";
 import knex from "./config/config";
 import router from "./routes/v1";
 
 const app = express();
 
 Model.knex(knex);
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
