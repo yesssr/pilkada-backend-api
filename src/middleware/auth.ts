@@ -1,16 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { v4 as uuidv4 } from "uuid";
 import { comparePass, createToken, success, verifyToken } from "../utils/utils";
 import { AuthService } from "../service/auth.services";
-import { UsersService } from "../service/users";
+import { UsersService } from "../service/users.services";
 import { localError } from "./error";
 
 const controller = {
   register: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = uuidv4();
       const data = req.body;
-      data.id = id;
       const user = await UsersService.save(data);
       success(res, "user succesfully registered", 201, user);
       return;
@@ -27,7 +24,6 @@ const controller = {
         let err = new localError();
         err.statusCode = 404;
         err.message = "email not registered !";
-
         throw err;
       }
       const isMatch = await comparePass(password!, find.password!);
@@ -35,7 +31,6 @@ const controller = {
         let err = new localError();
         err.statusCode = 401;
         err.message = "wrong password !";
-
         throw err;
       }
       find.password = undefined;
@@ -60,12 +55,10 @@ const controller = {
         let err = new localError();
         err.statusCode = 401;
         err.message = "invalid credentials !";
-
         throw err;
       }
       const payload = verifyToken(authorization);
       req.app.locals.credentials = payload;
-      console.log(payload);
       next();
       return;
     } catch (error) {
