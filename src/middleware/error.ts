@@ -19,11 +19,11 @@ export function errorHandler(
   if (err) {
     console.error(err.stack, err.message);
     if (err instanceof ValidationError) {
-      let msg = err.message.split("'")[1];
+      let msg = err.message.split(",")[0];
       return res.status(err.statusCode).json({
         success: false,
         statusCode: err.statusCode,
-        message: `${msg} is required`,
+        message: msg,
       });
     }
     if (err instanceof UniqueViolationError) {
