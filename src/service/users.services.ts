@@ -37,7 +37,8 @@ export class UsersService {
       )
       .joinRelated("role")
       .where("users.is_deleted", false)
-      .andWhere("users.id", id);
+      .andWhere("users.id", id)
+      .first();
   };
 
   static save = async (data: UsersModel) => {
@@ -47,9 +48,7 @@ export class UsersService {
 
   static update = async (data: UsersModel) => {
     return UsersModel.query()
-      .update(data)
-      .where("users.id", data.id)
-      .returning("*");
+      .patchAndFetchById(data.id, data);
   };
 
   static delete = async (id: string) => {

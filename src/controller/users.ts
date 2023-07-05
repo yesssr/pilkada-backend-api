@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { UsersService } from "../service/users";
+import { UsersService } from "../service/users.services";
 import { success } from "../utils/utils";
 import { localError } from "../middleware/error";
 import { UsersModel } from "../model/users";
@@ -23,7 +23,6 @@ const controller = {
         let err = new localError();
         err.message = "user not found";
         err.statusCode = 404;
-
         throw err;
       }
       success(res, "find user by id", 200, user);

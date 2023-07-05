@@ -3,8 +3,9 @@ import {
   Model,
   RelationMappings,
   RelationMappingsThunk,
-  ValidationError,
 } from "objection";
+import { v4 as uuidv4 } from "uuid";
+import { localError } from "../middleware/error";
 import { hashPass } from "../utils/utils";
 import { BaseModel } from "./basemodel";
 import { RoleModel } from "./roles";
@@ -20,6 +21,7 @@ export class UsersModel extends BaseModel {
   is_deleted!: boolean;
 
   async $beforeInsert() {
+    this.id = uuidv4();
     this.password = hashPass(this.password!);
     let check = await UsersModel.query()
       .select("email")
@@ -27,11 +29,10 @@ export class UsersModel extends BaseModel {
       .first();
 
     if (check) {
-      return new ValidationError({
-        message: "email already registered !",
-        statusCode: 400,
-        type: "string",
-      });
+      let err = new localError();
+      err.message = "email already registered !";
+      err.statusCode = 400;
+      throw err;
     }
   }
 
@@ -39,7 +40,6 @@ export class UsersModel extends BaseModel {
     if (this.password) {
       this.password = hashPass(this.password);
     }
-    this.updated_at = new Date().toISOString();
     if (this.email) {
       let check = await UsersModel.query()
         .select("id", "email")
@@ -47,11 +47,10 @@ export class UsersModel extends BaseModel {
         .first();
 
       if (check && check.email !== this.email) {
-        return new ValidationError({
-          message: "email already registered !",
-          statusCode: 400,
-          type: "string",
-        });
+        let err = new localError();
+        err.message = "email already registered !";
+        err.statusCode = 400;
+        throw err;
       }
     }
   }
