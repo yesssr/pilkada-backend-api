@@ -17,6 +17,7 @@ export class UsersModel extends BaseModel {
   email!: string;
   role_id!: number;
   role!: string;
+  slug!: string;
   password!: string | undefined;
   is_deleted!: boolean;
 
@@ -65,7 +66,7 @@ export class UsersModel extends BaseModel {
       email: { type: "string" },
       phone: { type: "string" },
       email_verified_at: { type: "string" },
-      password: { type: "string" },
+      password: { type: "string", minLength: 8 },
       remember_token: { type: "string" },
       photo: { type: "string" },
       role_id: { type: "integer" },
