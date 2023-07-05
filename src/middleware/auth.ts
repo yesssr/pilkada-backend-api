@@ -39,9 +39,10 @@ const controller = {
         email: find.email,
         role_id: find.role_id,
         role: find.role,
+        slug: find.slug,
       };
       const token = createToken(payload);
-      success(res, "login berhasil !", 200, find, ...[,], token);
+      success(res, "login successfully !", 200, find, ...[,], token);
       return;
     } catch (error) {
       next(error);

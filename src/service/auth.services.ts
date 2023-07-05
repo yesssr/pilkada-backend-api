@@ -14,6 +14,7 @@ export class AuthService {
         "users.photo",
         "users.role_id",
         "role.role",
+        "role.slug",
         "users.status",
         "users.notification_token"
       )
