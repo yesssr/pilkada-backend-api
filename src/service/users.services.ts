@@ -48,7 +48,8 @@ export class UsersService {
 
   static update = async (data: UsersModel) => {
     return UsersModel.query()
-      .patchAndFetchById(data.id, data);
+      .where("id", data.id)
+      .update(data);
   };
 
   static delete = async (id: string) => {

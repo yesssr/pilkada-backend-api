@@ -54,13 +54,13 @@ export class KontestanService {
 
   static update = (data: KontestanModel) => {
     return KontestanModel.query()
-      .patchAndFetchById(data.id, data);
+      .where("id", data.id)
+      .update(data);
   };
 
   static delete = (id: string) => {
     return KontestanModel.query()
       .where("kontestan.id", id)
-      .delete()
-      .returning("*");
+      .delete();
   };
 }
