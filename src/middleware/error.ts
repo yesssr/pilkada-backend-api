@@ -19,23 +19,26 @@ export function errorHandler(
   if (err) {
     console.error(err.stack, err.message);
     if (err instanceof ValidationError) {
+      let msg = err.message.split("'")[1];
       return res.status(err.statusCode).json({
         success: false,
         statusCode: err.statusCode,
-        message: err.message,
+        message: `${msg} is required`,
       });
     }
     if (err instanceof UniqueViolationError) {
       return res.status(400).json({
         success: false,
-        message: `${err.columns} sudah digunakan`,
+        statusCode: 400,
+        message: `${err.columns} already used`,
       });
     }
     if (err instanceof ForeignKeyViolationError) {
       let msg = err.constraint.split("_");
       return res.status(400).json({
         success: false,
-        message: `${msg[1]} tidak tersedia`,
+        statusCode: 400,
+        message: `${msg[1]} not available`,
       });
     }
     if (err instanceof localError) {
