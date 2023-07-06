@@ -77,6 +77,7 @@ export class TpsService {
     return Tps.query()
       .patchAndFetchById(id, {
         is_deleted: true,
+        status: 0,
       });
   };
 }

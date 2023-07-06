@@ -62,6 +62,7 @@ export class UsersService {
     return UsersModel.query()
       .patchAndFetchById(id, {
         is_deleted: true,
+        status: 0,
       });
   };
 }

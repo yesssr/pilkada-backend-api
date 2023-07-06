@@ -18,10 +18,12 @@ export class Tps extends BaseModel {
   id!: string;
   is_deleted!: boolean;
   slug!: string;
+  status!: number;
   name!: string;
 
   $beforeInsert(): void {
     this.id = v4();
+    this.status = 1;
     this.slug = nameToSlug(this.name);
     this.is_deleted = false;
   }
