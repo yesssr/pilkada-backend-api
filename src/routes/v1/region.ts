@@ -1,10 +1,10 @@
 import { Response, Router, Request, NextFunction } from "express";
+import { localError } from "../../middleware/error";
 import { Provinces } from "../../model/provinces";
 import { Regencies } from "../../model/regencies";
 import { Districts } from "../../model/districts";
 import { Villages } from "../../model/villages";
 import { success } from "../../utils/utils";
-import { localError } from "../../middleware/error";
 
 const router = Router();
 
