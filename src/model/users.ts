@@ -10,10 +10,11 @@ import { hashPass } from "../utils/utils";
 import { BaseModel } from "./basemodel";
 import { RoleModel } from "./roles";
 import { StatusUser } from "./status_user";
+import { UserTokens } from "./user_tokens";
 
 export class UsersModel extends BaseModel {
-  // phone!: string;
-  // name!: string;
+  phone!: string;
+  name!: string;
   id!: string;
   email!: string;
   role_id!: number;
@@ -97,6 +98,16 @@ export class UsersModel extends BaseModel {
       join: {
         from: "users.status",
         to: "status_user.code",
+      },
+    },
+
+    user_token: {
+      relation: Model.HasOneRelation,
+      modelClass: UserTokens,
+
+      join: {
+        from: "users.id",
+        to: "user_tokens.user_id",
       },
     },
   });

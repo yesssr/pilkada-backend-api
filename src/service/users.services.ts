@@ -1,5 +1,13 @@
 import { UsersModel } from "../model/users";
 
+interface User {
+  email: string;
+  name: string;
+  phone: string;
+  role_id: number;
+  password: string;
+}
+
 export class UsersService {
   static getAllUsers = () => {
     return UsersModel.query()
@@ -47,7 +55,7 @@ export class UsersService {
       .first();
   };
 
-  static save = (data: UsersModel) => {
+  static save = (data: User) => {
     return UsersModel.query()
       .insert(data);
   };

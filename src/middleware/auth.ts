@@ -3,13 +3,39 @@ import { comparePass, createToken, success, verifyToken } from "../utils/utils";
 import { AuthService } from "../service/auth.services";
 import { UsersService } from "../service/users.services";
 import { localError } from "./error";
+import { UserTokenService } from "../service/user_tokens.services";
+import { UsersModel } from "../model/users";
 
 const controller = {
   register: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const data = req.body;
+      const { email, name, phone, role_id, password, token } = req.body;
+      const data = {
+        email,
+        name,
+        phone,
+        role_id,
+        password,
+      };
+      let checkToken = await UserTokenService.checkStatusToken(token);
+      if (!checkToken) {
+        let err = new localError();
+        err.message = "token not registered !";
+        err.statusCode = 400;
+        throw err;
+      }
+      if (checkToken?.status !== "available") {
+        let err = new localError();
+        err.message = "token already used !";
+        err.statusCode = 400;
+        throw err;
+      }
       const user = await UsersService.save(data);
-      success(res, "user succesfully registered", 201, user);
+      const user_token = await UserTokenService.addUserIdToToken(
+        user.id,
+        token
+      );
+      success(res, "user succesfully registered", 201, user_token);
       return;
     } catch (error) {
       next(error);

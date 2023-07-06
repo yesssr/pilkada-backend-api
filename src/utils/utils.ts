@@ -41,7 +41,7 @@ export function success(
     message: msg,
     statusCode: statusCode,
     data: data,
-    token: token,
+    credentials: token,
   });
 }
 
@@ -71,4 +71,14 @@ export function nameToSlug(string: string) {
 
   const slugName = slug(string + "-" + uuidv4());
   return slugName;
+}
+
+export function getUniqueNumber() {
+  let date = new Date().toLocaleDateString().split("/");
+  let day = date[1],
+    month = date[0],
+    year = date[2];
+  let number = year + "" + month + "" + day;
+  let randNumber = Math.floor(Number(Math.random().toFixed(4)) * 10000);
+  return number + "" + randNumber;
 }
