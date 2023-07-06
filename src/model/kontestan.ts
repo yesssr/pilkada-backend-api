@@ -7,7 +7,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { BaseModel } from "./basemodel";
 import { KontestanPeriodModel } from "./kontestan.period";
-import { StatusKontestan } from "./status.kontestan";
+import { StatusKontestan } from "./status_kontestan";
 import { nameToSlug } from "../utils/utils";
 import { UsersModel } from "./users";
 
