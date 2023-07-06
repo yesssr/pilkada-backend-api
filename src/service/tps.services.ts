@@ -1,7 +1,7 @@
 import { Tps } from "../model/tps";
 
 export class TpsService {
-  static getAllTps = async () => {
+  static getAllTps = () => {
     return Tps.query()
       .select(
         "tps.id",
@@ -31,7 +31,7 @@ export class TpsService {
       .where("tps.is_deleted", false);
   };
 
-  static getByTpsId = async (id: string) => {
+  static getByTpsId = (id: string) => {
     return Tps.query()
       .select(
         "tps.id",
@@ -62,18 +62,18 @@ export class TpsService {
       .first();
   };
 
-  static save = async (data: Tps) => {
+  static save = (data: Tps) => {
     return Tps.query()
       .insert(data);
   };
 
-  static update = async (data: Tps) => {
+  static update = (data: Tps) => {
     return Tps.query()
     .where("tps.id", data.id)
     .update(data);
   };
 
-  static deleteById = async (id: string) => {
+  static deleteById = (id: string) => {
     return Tps.query()
       .patchAndFetchById(id, {
         is_deleted: true,

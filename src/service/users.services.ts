@@ -47,18 +47,18 @@ export class UsersService {
       .first();
   };
 
-  static save = async (data: UsersModel) => {
+  static save = (data: UsersModel) => {
     return UsersModel.query()
       .insert(data);
   };
 
-  static update = async (data: UsersModel) => {
+  static update = (data: UsersModel) => {
     return UsersModel.query()
       .where("id", data.id)
       .update(data);
   };
 
-  static delete = async (id: string) => {
+  static delete = (id: string) => {
     return UsersModel.query()
       .patchAndFetchById(id, {
         is_deleted: true,
