@@ -14,9 +14,12 @@ export class UsersService {
         "users.role_id",
         "role.role",
         "users.status",
-        "users.notification_token"
+        "status_user.en as status_user",
+        "users.notification_token",
+        "users.created_at",
+        "users.updated_at"
       )
-      .joinRelated("role")
+      .joinRelated("[role, status_user]")
       .where("users.is_deleted", false);
   };
 
@@ -33,9 +36,12 @@ export class UsersService {
         "users.role_id",
         "role.role",
         "users.status",
-        "users.notification_token"
+        "status_user.en as status_user",
+        "users.notification_token",
+        "users.created_at",
+        "users.updated_at"
       )
-      .joinRelated("role")
+      .joinRelated("[role, status_user]")
       .where("users.is_deleted", false)
       .andWhere("users.id", id)
       .first();

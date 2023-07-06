@@ -9,6 +9,7 @@ import { localError } from "../middleware/error";
 import { hashPass } from "../utils/utils";
 import { BaseModel } from "./basemodel";
 import { RoleModel } from "./roles";
+import { StatusUser } from "./status_user";
 
 export class UsersModel extends BaseModel {
   // phone!: string;
@@ -18,11 +19,13 @@ export class UsersModel extends BaseModel {
   role_id!: number;
   role!: string;
   slug!: string;
+  status!: number;
   password!: string | undefined;
   is_deleted!: boolean;
 
   async $beforeInsert() {
     this.id = uuidv4();
+    this.status = 1;
     this.password = hashPass(this.password!);
     let check = await UsersModel.query()
       .select("email")
@@ -84,6 +87,16 @@ export class UsersModel extends BaseModel {
       join: {
         from: "users.role_id",
         to: "role.id",
+      },
+    },
+
+    status_user: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: StatusUser,
+
+      join: {
+        from: "users.status",
+        to: "status_user.code",
       },
     },
   });
