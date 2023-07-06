@@ -50,6 +50,7 @@ export function errorHandler(
     }
     return res.status(500).json({
       success: false,
+      statusCode: 500,
       message: err,
     });
   }
