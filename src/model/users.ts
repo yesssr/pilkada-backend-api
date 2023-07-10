@@ -13,9 +13,10 @@ import { StatusUser } from "./status_user";
 import { UserTokens } from "./user_tokens";
 
 export class UsersModel extends BaseModel {
+  id!: string;
+  bearer_id!: number;
   phone!: string;
   name!: string;
-  id!: string;
   email!: string;
   role_id!: number;
   role!: string;
@@ -63,7 +64,7 @@ export class UsersModel extends BaseModel {
   static tableName: string = "users";
   static jsonSchema: JSONSchema = {
     type: "object",
-    required: ["name", "email", "phone", "password", "role_id"],
+    required: ["name", "email", "phone", "password", "role_id", "bearer_id"],
     properties: {
       id: { type: "string" },
       name: { type: "string" },
