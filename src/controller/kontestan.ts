@@ -42,7 +42,7 @@ const controller = {
       data.created_by = req.app.locals.credentials.email;
       const kontestan = await KontestanService.save(data);
       success(res, "kontestan successfully created", 201, kontestan);
-      return
+      return;
     } catch (error) {
       next(error);
     }
@@ -71,6 +71,20 @@ const controller = {
       const id = req.params.id;
       const kontestan = await KontestanService.delete(id);
       success(res, "success delete kontestan", 200, kontestan);
+      return;
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  findKontestanWithElections: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const kontestan = await KontestanService.getKontestanWithElections();
+      success(res, "find kontestan with list elections", 200, kontestan);
       return;
     } catch (error) {
       next(error);

@@ -1,27 +1,34 @@
 import {
+  AnyQueryBuilder,
   JSONSchema,
   Model,
+  Modifiers,
   RelationMappings,
   RelationMappingsThunk,
 } from "objection";
 import { v4 } from "uuid";
-import { nameToSlug } from "../utils/utils";
+import { getUniqueNumber, nameToSlug } from "../utils/utils";
+import { StatusTps } from "./status_tps";
 import { BaseModel } from "./basemodel";
 import { Districts } from "./districts";
 import { Provinces } from "./provinces";
 import { Regencies } from "./regencies";
-import { StatusTps } from "./status_tps";
-import { UsersModel } from "./users";
 import { Villages } from "./villages";
+import { UsersModel } from "./users";
+import { KontestanModel } from "./kontestan";
+import { Elections } from "./election";
 
 export class Tps extends BaseModel {
   id!: string;
+  code!: string;
   is_deleted!: boolean;
   slug!: string;
   status!: number;
   name!: string;
 
   $beforeInsert(): void {
+    if (!this.code) this.code = getUniqueNumber();
+
     this.id = v4();
     this.status = 1;
     this.slug = nameToSlug(this.name);
@@ -125,5 +132,35 @@ export class Tps extends BaseModel {
         to: "status_tps.code",
       },
     },
+
+    elections: {
+      relation: Model.HasManyRelation,
+      modelClass: Elections,
+
+      join: {
+        from: "tps.code",
+        // through: {
+        //   from: "elections.tps_code",
+        //   to: "elections.kontestan_id",
+        // },
+        to: "elections.tps_code",
+      },
+    },
   });
+
+  static modifiers: Modifiers<AnyQueryBuilder> = {
+    mod_get_elections(query) {
+      query
+        .withGraphFetched("elections")
+        .modifyGraph("elections", (builder) => {
+          builder
+            .select("kontestan_id", "kontestan:users.name as kontestan")
+            .count("elections.id", { as: "summary" })
+            .from("elections")
+            .groupBy("kontestan_id", "tps_code")
+            .joinRelated("kontestan")
+            .joinRelated("kontestan.users");
+        });
+    },
+  };
 }

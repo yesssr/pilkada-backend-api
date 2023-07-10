@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authController } from "../../middleware/auth";
 import { errorHandler } from "../../middleware/error";
 import { kontestanRouter } from "./kontestan";
+import { electionsRouter } from "./elections";
 import { regionRouter } from "./region";
 import { tokenRouter } from "./token";
 import { usersRouter } from "./users";
@@ -19,6 +20,7 @@ router.use("/roles", rolesRouter);
 router.use("/tps", tpsRouter);
 router.use("/region", regionRouter);
 router.use("/kontestan", kontestanRouter);
+router.use("/elections", electionsRouter);
 router.use(errorHandler);
 
 export default router;

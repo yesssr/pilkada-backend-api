@@ -66,6 +66,20 @@ const controller = {
       next(error);
     }
   },
+
+  findTpsWithElections: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const elections = await TpsService.getTpsWithElections();
+      success(res, "find tps with list elections", 200, elections);
+      return;
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 export { controller as tps };

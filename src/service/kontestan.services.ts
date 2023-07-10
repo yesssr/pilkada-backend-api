@@ -63,4 +63,27 @@ export class KontestanService {
       .where("kontestan.id", id)
       .delete();
   };
+
+  static getKontestanWithElections = () => {
+    return KontestanModel.query()
+      .select(
+        "kontestan.id",
+        "kontestan.service_id",
+        "kontestan.user_id",
+        "users.name as kontestan_name",
+        "kontestan_period.service_name as period",
+        "kontestan.date_start",
+        "kontestan.banner",
+        "kontestan.title",
+        "kontestan.slug",
+        "kontestan.description",
+        "kontestan.url",
+        "status_kontestan.en as status",
+        "kontestan.created_by",
+        "kontestan.created_at",
+        "kontestan.updated_at"
+      )
+      .joinRelated("[users, kontestan_period, status_kontestan]")
+      .modify("mod_get_elections")
+  }
 }

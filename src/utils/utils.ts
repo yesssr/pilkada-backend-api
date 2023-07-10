@@ -69,16 +69,24 @@ export function nameToSlug(string: string) {
     trim: true, // trim leading and trailing replacement chars, defaults to `true`
   };
 
-  const slugName = slug(string + "-" + uuidv4());
+  const slugName = slug(string + "-" + getUniqueNumber());
   return slugName;
 }
 
 export function getUniqueNumber() {
-  let date = new Date().toLocaleDateString().split("/");
-  let day = date[1],
-    month = date[0],
-    year = date[2];
-  let number = year + "" + month + "" + day;
-  let randNumber = Math.floor(Number(Math.random().toFixed(4)) * 10000);
-  return number + "" + randNumber;
+  let date = new Date();
+  let dateUnique = date.toLocaleDateString().split("/");
+  let timeUnique = date.toLocaleTimeString("it-IT").split(":");
+  let day = dateUnique[1],
+    month = dateUnique[0],
+    year = dateUnique[2];
+
+  let hours = timeUnique[0],
+    minute = timeUnique[1],
+    second = timeUnique[2];
+
+  let dateNumber = year + "" + month + "" + day;
+  let timeNumber = hours + "" + minute + "" + second;
+  // let randNumber = Math.floor(Number(Math.random().toFixed(4)) * 10000);
+  return dateNumber + "" + timeNumber;
 }
