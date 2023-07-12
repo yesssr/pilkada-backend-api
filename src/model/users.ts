@@ -6,11 +6,12 @@ import {
 } from "objection";
 import { v4 as uuidv4 } from "uuid";
 import { localError } from "../middleware/error";
-import { hashPass } from "../utils/utils";
-import { BaseModel } from "./basemodel";
-import { RoleModel } from "./roles";
 import { StatusUser } from "./status_user";
 import { UserTokens } from "./user_tokens";
+import { hashPass } from "../utils/utils";
+import { BaseModel } from "./basemodel";
+import { Bearers } from "./bearers";
+import { RoleModel } from "./roles";
 
 export class UsersModel extends BaseModel {
   id!: string;
@@ -26,6 +27,7 @@ export class UsersModel extends BaseModel {
   is_deleted!: boolean;
 
   async $beforeInsert() {
+    this.created_at = new Date();
     this.id = uuidv4();
     this.status = 1;
     this.password = hashPass(this.password!);
@@ -43,6 +45,7 @@ export class UsersModel extends BaseModel {
   }
 
   async $beforeUpdate() {
+    this.updated_at = new Date();
     if (this.password) {
       this.password = hashPass(this.password);
     }
@@ -82,6 +85,16 @@ export class UsersModel extends BaseModel {
   };
 
   static relationMappings: RelationMappings | RelationMappingsThunk = () => ({
+    bearers: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: Bearers,
+
+      join: {
+        from: "users.bearer_id",
+        to: "bearers.id",
+      },
+    },
+
     role: {
       relation: Model.HasOneRelation,
       modelClass: RoleModel,

@@ -5,6 +5,8 @@ export class AuthService {
     return UsersModel.query()
       .select(
         "users.id",
+        "users.bearer_id",
+        "bearers.name as bearer",
         "users.name",
         "users.email",
         "users.phone",
@@ -18,7 +20,7 @@ export class AuthService {
         "users.status",
         "users.notification_token"
       )
-      .joinRelated("role")
+      .joinRelated("[role, bearers]")
       .where("users.is_deleted", false)
       .andWhere("users.email", email)
       .first();

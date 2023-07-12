@@ -13,10 +13,12 @@ export class RoleModel extends BaseModel {
   $beforeInsert(): void {
     this.id = v4();
     this.slug = nameToSlug(this.role);
+    this.created_at = new Date();
   }
 
   $beforeUpdate(): void {
     this.slug = nameToSlug(this.role);
+    this.updated_at = new Date();
   }
 
   static jsonSchema: JSONSchema = {
