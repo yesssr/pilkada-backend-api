@@ -1,13 +1,15 @@
 import { KontestanModel } from "../model/kontestan";
 
 export class KontestanService {
-  static getAllKontestan = () => {
+  static getAllKontestan = (bearer_id: number) => {
     return KontestanModel.query()
       .select(
         "kontestan.id",
         "kontestan.service_id",
         "kontestan.user_id",
-        "users.name as kontestan_name",
+        "kontestan.bearer_id",
+        "bearers.name as bearer",
+        "users.name as kontestan",
         "kontestan_period.service_name as period",
         "kontestan.date_start",
         "kontestan.banner",
@@ -20,16 +22,19 @@ export class KontestanService {
         "kontestan.created_at",
         "kontestan.updated_at"
       )
-      .joinRelated("[users, kontestan_period, status_kontestan]");
+      .joinRelated("[users, kontestan_period, status_kontestan, bearers]")
+      .where("kontestan.bearer_id", bearer_id);
   };
 
-  static getByKontestanId = (id: string) => {
+  static getByKontestanId = (id: string, bearer_id: number) => {
     return KontestanModel.query()
       .select(
         "kontestan.id",
         "kontestan.service_id",
         "kontestan.user_id",
-        "users.name as kontestan_name",
+        "kontestan.bearer_id",
+        "bearers.name as bearer",
+        "users.name as kontestan",
         "kontestan_period.service_name as period",
         "kontestan.date_start",
         "kontestan.banner",
@@ -42,8 +47,9 @@ export class KontestanService {
         "kontestan.created_at",
         "kontestan.updated_at"
       )
-      .joinRelated("[users, kontestan_period, status_kontestan]")
+      .joinRelated("[users, kontestan_period, status_kontestan, bearers]")
       .where("kontestan.id", id)
+      .andWhere("kontestan.bearer_id", bearer_id)
       .first();
   };
 
@@ -64,13 +70,15 @@ export class KontestanService {
       .delete();
   };
 
-  static getKontestanWithElections = () => {
+  static getKontestanWithElections = (bearer_id: number) => {
     return KontestanModel.query()
       .select(
         "kontestan.id",
         "kontestan.service_id",
         "kontestan.user_id",
-        "users.name as kontestan_name",
+        "kontestan.bearer_id",
+        "bearers.name as bearer",
+        "users.name as kontestan",
         "kontestan_period.service_name as period",
         "kontestan.date_start",
         "kontestan.banner",
@@ -83,7 +91,8 @@ export class KontestanService {
         "kontestan.created_at",
         "kontestan.updated_at"
       )
-      .joinRelated("[users, kontestan_period, status_kontestan]")
+      .joinRelated("[users, kontestan_period, status_kontestan, bearers]")
       .modify("mod_get_elections")
+      .where("kontestan.bearer_id", bearer_id);
   }
 }

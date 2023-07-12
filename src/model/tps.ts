@@ -13,14 +13,15 @@ import { BaseModel } from "./basemodel";
 import { Districts } from "./districts";
 import { Provinces } from "./provinces";
 import { Regencies } from "./regencies";
+import { Elections } from "./election";
 import { Villages } from "./villages";
 import { UsersModel } from "./users";
-import { KontestanModel } from "./kontestan";
-import { Elections } from "./election";
+import { Bearers } from "./bearers";
 
 export class Tps extends BaseModel {
   id!: string;
   code!: string;
+  bearer_id!: number;
   is_deleted!: boolean;
   slug!: string;
   status!: number;
@@ -29,6 +30,7 @@ export class Tps extends BaseModel {
   $beforeInsert(): void {
     if (!this.code) this.code = getUniqueNumber();
 
+    this.created_at = new Date();
     this.id = v4();
     this.status = 1;
     this.slug = nameToSlug(this.name);
@@ -36,6 +38,7 @@ export class Tps extends BaseModel {
   }
 
   $beforeUpdate(): void {
+    this.updated_at = new Date();
     if (this.name) this.slug = nameToSlug(this.name);
   }
 
@@ -46,6 +49,7 @@ export class Tps extends BaseModel {
     required: [
       "user_id",
       "name",
+      "bearer_id",
       "province_id",
       "regency_id",
       "district_id",
@@ -60,6 +64,7 @@ export class Tps extends BaseModel {
       user_id: { type: "string" },
       name: { type: "string" },
       slug: { type: "string" },
+      bearer_id: { type: "integer" },
       province_id: { type: "string" },
       regency_id: { type: "string" },
       district_id: { type: "string" },
@@ -73,6 +78,16 @@ export class Tps extends BaseModel {
   };
 
   static relationMappings: RelationMappings | RelationMappingsThunk = () => ({
+    bearers: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: Bearers,
+
+      join: {
+        from: "tps.bearer_id",
+        to: "bearers.id",
+      },
+    },
+    
     users: {
       relation: Model.BelongsToOneRelation,
       modelClass: UsersModel,

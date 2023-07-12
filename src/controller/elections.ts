@@ -15,7 +15,6 @@ const controller = {
       if (!data.nik) throw new localError("nik is required", 400);
       if (!data.name) throw new localError("name is required", 400);
       data.type = "submit";
-      data.user_id = req.app.locals.credentials.id;
       data.created_by = req.app.locals.credentials.id;
       const election = await ElectionsService.addElection(data);
       success(
@@ -35,7 +34,6 @@ const controller = {
       const data = req.body;
       data.type = "import";
       data.poin = "1";
-      data.user_id = req.app.locals.credentials.id;
       data.created_by = req.app.locals.credentials.id;
       const election = await ElectionsService.addElection(data);
       success(
@@ -56,9 +54,11 @@ const controller = {
     next: NextFunction
   ) => {
     try {
+      const bearer_id = req.app.locals.credentials.bearer_id;
       const kontestan_id = req.params.kontestan_id;
       const elections = await ElectionsService.countElectionByKontestanId(
-        kontestan_id
+        kontestan_id,
+        bearer_id
       );
       success(res, "count election by kontestan_id", 200, elections);
       return;
@@ -73,12 +73,14 @@ const controller = {
     next: NextFunction
   ) => {
     try {
+      const bearer_id = req.app.locals.credentials.bearer_id;
       const kontestan_id = req.params.kontestan_id;
       const tps_code = req.params.tps_code;
       const elections =
         await ElectionsService.countElectionByKontestanIdAndTpsCode(
           kontestan_id,
-          tps_code
+          tps_code,
+          bearer_id
         );
       success(res, "count election by tps and kontestan id", 200, elections);
       return;
@@ -93,8 +95,12 @@ const controller = {
     next: NextFunction
   ) => {
     try {
+      const bearer_id = req.app.locals.credentials.bearer_id;
       const tps_code = req.params.tps_code;
-      const elections = await ElectionsService.countElectionByTpsCode(tps_code);
+      const elections = await ElectionsService.countElectionByTpsCode(
+        tps_code,
+        bearer_id
+      );
       success(res, "count elections by tps", 200, elections);
       return;
     } catch (error) {
@@ -108,7 +114,8 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      const elections = await ElectionsService.countAllElections();
+      const bearer_id = req.app.locals.credentials.bearer_id;
+      const elections = await ElectionsService.countAllElections(bearer_id);
       success(res, "count all elections", 200, elections);
       return;
     } catch (error) {
@@ -151,7 +158,8 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      const eSummary = await ElectionsService.getElectionSummary();
+      const bearer_id = req.app.locals.credentials.bearer_id;
+      const eSummary = await ElectionsService.getElectionSummary(bearer_id);
       success(res, "find all election summary", 200, eSummary);
       return;
     } catch (error) {

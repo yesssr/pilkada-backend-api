@@ -1,12 +1,14 @@
 import { Tps } from "../model/tps";
 
 export class TpsService {
-  static getAllTps = () => {
+  static getAllTps = (bearer_id: number) => {
     return Tps.query()
       .select(
         "tps.id",
         "tps.user_id",
         "tps.code",
+        "tps.bearer_id",
+        "bearers.name as bearer",
         "tps.province_id",
         "tps.regency_id",
         "tps.district_id",
@@ -28,17 +30,20 @@ export class TpsService {
         "tps.updated_at"
       )
       .joinRelated(
-        "[users, provinces, regencies, districts, villages, status_tps]"
+        "[users, provinces, regencies, districts, villages, status_tps, bearers]"
       )
-      .where("tps.is_deleted", false);
+      .where("tps.is_deleted", false)
+      .andWhere("tps.bearer_id", bearer_id);
   };
 
-  static getTpsWithElections = () => {
+  static getTpsWithElections = (bearer_id: number) => {
     return Tps.query()
       .select(
         "tps.id",
         "tps.user_id",
         "tps.code",
+        "tps.bearer_id",
+        "bearers.name as bearer",
         "tps.province_id",
         "tps.regency_id",
         "tps.district_id",
@@ -60,17 +65,20 @@ export class TpsService {
         "tps.updated_at"
       )
       .joinRelated(
-        "[users, provinces, regencies, districts, villages, status_tps]"
+        "[users, provinces, regencies, districts, villages, status_tps, bearers]"
       )
       .modify("mod_get_elections")
-      .where("tps.is_deleted", false);
+      .where("tps.is_deleted", false)
+      .andWhere("tps.bearer_id", bearer_id);
   };
 
-  static getByTpsId = (id: string) => {
+  static getByTpsId = (id: string, bearer_id: number) => {
     return Tps.query()
       .select(
         "tps.id",
         "tps.user_id",
+        "tps.bearer_id",
+        "bearers.name as bearer",
         "tps.slug",
         "tps.province_id",
         "tps.regency_id",
@@ -92,10 +100,11 @@ export class TpsService {
         "tps.updated_at"
       )
       .joinRelated(
-        "[users, provinces, regencies, districts, villages, status_tps]"
+        "[users, provinces, regencies, districts, villages, status_tps, bearers]"
       )
       .where("tps.is_deleted", false)
       .andWhere("tps.id", id)
+      .andWhere("tps.bearer_id", bearer_id)
       .first();
   };
 

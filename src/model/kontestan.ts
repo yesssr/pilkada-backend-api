@@ -7,16 +7,17 @@ import {
   RelationMappingsThunk,
 } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import { BaseModel } from "./basemodel";
 import { KontestanPeriodModel } from "./kontestan.period";
 import { StatusKontestan } from "./status_kontestan";
 import { nameToSlug } from "../utils/utils";
-import { UsersModel } from "./users";
-import { Tps } from "./tps";
+import { BaseModel } from "./basemodel";
 import { Elections } from "./election";
+import { UsersModel } from "./users";
+import { Bearers } from "./bearers";
 
 export class KontestanModel extends BaseModel {
   id!: string;
+  bearer_id!: number;
   slug!: string;
   title!: string;
   status!: number;
@@ -27,10 +28,12 @@ export class KontestanModel extends BaseModel {
     this.id = uuidv4();
     this.status = 1;
     this.slug = nameToSlug(this.title);
+    this.created_at = new Date();
   }
 
   $beforeUpdate() {
     if (this.title) this.slug = nameToSlug(this.title);
+    this.updated_at = new Date();
   }
 
   static jsonSchema: JSONSchema = {
@@ -38,6 +41,7 @@ export class KontestanModel extends BaseModel {
     required: [
       "service_id",
       "user_id",
+      "bearer_id",
       "banner",
       "title",
       "description",
@@ -47,6 +51,7 @@ export class KontestanModel extends BaseModel {
     properties: {
       id: { type: "string" },
       service_id: { type: "string" },
+      bearer_id: { type: "number" },
       user_id: { type: "string" },
       date_start: { type: "string" },
       banner: { type: "string" },
@@ -60,6 +65,16 @@ export class KontestanModel extends BaseModel {
   };
 
   static relationMappings: RelationMappings | RelationMappingsThunk = () => ({
+    bearers: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: Bearers,
+
+      join: {
+        from: "kontestan.bearer_id",
+        to: "bearers.id",
+      },
+    },
+
     users: {
       relation: Model.BelongsToOneRelation,
       modelClass: UsersModel,

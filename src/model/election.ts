@@ -36,7 +36,6 @@ export class Elections extends BaseModel {
   static jsonSchema: JSONSchema = {
     type: "object",
     required: [
-      "user_id",
       "tps_code",
       "nik",
       "name",
@@ -92,15 +91,6 @@ export class Elections extends BaseModel {
         to: "kontestan.id",
       },
     },
-
-    // election_kontestan: {
-    //   relation: Model.HasManyRelation,
-    //   modelClass: Elections,
-
-    //   join: {
-    //     from: "election"
-    //   }
-    // }
   });
 
   static modifiers: Modifiers<AnyQueryBuilder> = {

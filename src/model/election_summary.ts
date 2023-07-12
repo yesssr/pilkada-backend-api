@@ -4,10 +4,10 @@ import {
   RelationMappings,
   RelationMappingsThunk,
 } from "objection";
-import { BaseModel } from "./basemodel";
 import { KontestanModel } from "./kontestan";
-import { Tps } from "./tps";
+import { BaseModel } from "./basemodel";
 import { UsersModel } from "./users";
+import { Tps } from "./tps";
 
 export class ElectionSummary extends BaseModel {
   id!: string;

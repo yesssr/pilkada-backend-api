@@ -7,7 +7,8 @@ import { Tps } from "../model/tps";
 const controller = {
   findAllTps: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const tps = await TpsService.getAllTps();
+      const bearer_id = req.app.locals.credentials.bearer_id;
+      const tps = await TpsService.getAllTps(bearer_id);
       success(res, "find all tps", 200, tps);
       return;
     } catch (error) {
@@ -18,7 +19,8 @@ const controller = {
   findByIdTps: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id;
-      const tps = await TpsService.getByTpsId(id);
+      const bearer_id = req.app.locals.credentials.bearer_id;
+      const tps = await TpsService.getByTpsId(id, bearer_id);
       if (!tps) {
         let err = new localError();
         err.message = "tps not found";
@@ -34,7 +36,9 @@ const controller = {
 
   createTps: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const bearer_id = req.app.locals.credentials.bearer_id;
       const data: Tps = req.body;
+      data.bearer_id = bearer_id;
       const tps = await TpsService.save(data);
       success(res, "tps successfully created", 201, tps);
       return;
@@ -73,7 +77,8 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      const elections = await TpsService.getTpsWithElections();
+      const bearer_id = req.app.locals.credentials.bearer_id;
+      const elections = await TpsService.getTpsWithElections(bearer_id);
       success(res, "find tps with list elections", 200, elections);
       return;
     } catch (error) {

@@ -14,68 +14,77 @@ export class ElectionsService {
     return Elections.query().insert(data);
   };
 
-  static countElectionByKontestanId = async (kontestan_id: string) => {
+  static countElectionByKontestanId = async (kontestan_id: string, bearer_id: number) => {
     return Elections.query()
       .select(
         "kontestan_id",
         "tps_code",
-        "kontestan:users.name as kontestan_name",
+        "kontestan:users.name as kontestan",
         "tps.name as tps"
       )
       .count("elections.id", { as: "summary" })
       .from("elections")
       .where("kontestan_id", kontestan_id)
+      .andWhere("kontestan.bearer_id", bearer_id)
+      .andWhere("tps.bearer_id", bearer_id)
       .groupBy("kontestan_id", "tps_code")
       .joinRelated("[kontestan, tps]")
       .joinRelated("kontestan.users");
   };
 
-  static countElectionByTpsCode = async (tps_code: string) => {
+  static countElectionByTpsCode = async (tps_code: string, bearer_id: number) => {
     return Elections.query()
       .select(
         "kontestan_id",
         "tps_code",
-        "kontestan:users.name as kontestan_name",
+        "kontestan:users.name as kontestan",
         "tps.name as tps"
       )
       .count("elections.id", { as: "summary" })
       .from("elections")
       .where("tps_code", tps_code)
       .groupBy("kontestan_id", "tps_code")
+      .andWhere("kontestan.bearer_id", bearer_id)
+      .andWhere("tps.bearer_id", bearer_id)
       .joinRelated("[kontestan, tps]")
       .joinRelated("kontestan.users");
   };
 
   static countElectionByKontestanIdAndTpsCode = async (
     kontestan_id: string,
-    tps_code: string
+    tps_code: string,
+    bearer_id: number
   ) => {
     return Elections.query()
       .select(
         "kontestan_id",
         "tps_code",
-        "kontestan:users.name as kontestan_name",
+        "kontestan:users.name as kontestan",
         "tps.name as tps"
       )
       .count("elections.id", { as: "summary" })
       .from("elections")
       .where("kontestan_id", kontestan_id)
+      .andWhere("kontestan.bearer_id", bearer_id)
+      .andWhere("tps.bearer_id", bearer_id)
       .andWhere("tps_code", tps_code)
       .groupBy("kontestan_id", "tps_code")
       .joinRelated("[kontestan, tps]")
       .joinRelated("kontestan.users");
   };
 
-  static countAllElections = () => {
+  static countAllElections = (bearer_id: number) => {
     return Elections.query()
       .select(
         "kontestan_id",
         "tps_code",
-        "kontestan:users.name as kontestan_name",
+        "kontestan:users.name as kontestan",
         "tps.name as tps"
       )
       .count("elections.id", { as: "summary" })
       .from("elections")
+      .where("kontestan.bearer_id", bearer_id)
+      .andWhere("tps.bearer_id", bearer_id)
       .groupBy("kontestan_id", "tps_code")
       .joinRelated("[kontestan, tps]")
       .joinRelated("kontestan.users");
@@ -87,7 +96,7 @@ export class ElectionsService {
    * ========================
    */
 
-  static getElectionSummary = () => {
+  static getElectionSummary = (bearer_id: number) => {
     return ElectionSummary.query()
       .select(
         "election_summary.id",
@@ -100,6 +109,8 @@ export class ElectionsService {
         "election_summary.summary"
       )
       .joinRelated("[users, kontestan, tps]")
+      .where("users.bearer_id", bearer_id)
+      .andWhere("kontestan.bearer_id", bearer_id)
       .joinRelated("kontestan.users");
   };
 
