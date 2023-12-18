@@ -29,10 +29,9 @@ export class ElectionsService {
 
   static countElectionByKontestanId = async (
     kontestan_id: string,
-    bearer_id: number,
-    tps_code?: string
+    bearer_id: number
   ) => {
-    let query = Elections.query()
+    return Elections.query()
       .count("elections.id as summary")
       .groupBy("elections.kontestan_id")
       .select("elections.kontestan_id", "kontestan.title as kontestan")
@@ -40,9 +39,6 @@ export class ElectionsService {
       .where("tps.is_deleted", false)
       .andWhere("tps.bearer_id", bearer_id)
       .andWhere("elections.kontestan_id", kontestan_id);
-
-    if (tps_code) query.andWhere("elections.tps_code", tps_code);
-    return query;
   };
 
   static detailElectionsByKontestanIdAndTpsCode = async (
@@ -215,10 +211,9 @@ export class ElectionsService {
 
   static getCountElectionSummaryByKonId = (
     bearer_id: number,
-    kontestan_id: string,
-    tps_code?: string
+    kontestan_id: string
   ) => {
-    let query = ElectionSummary.query()
+    return ElectionSummary.query()
       .count("election_summary.id as summary")
       .groupBy("election_summary.kontestan_id")
       .select(
@@ -232,9 +227,6 @@ export class ElectionsService {
       .andWhere("tps.bearer_id", bearer_id)
       .andWhere("election_summary.kontestan_id", kontestan_id)
       .andWhere("kontestan:users.bearer_id", bearer_id);
-
-    if (tps_code) query.andWhere("election_summary.tps_code", tps_code);
-    return query;
   };
 
   static saveElectionSummary = async (data: ElectionSummary) => {

@@ -37,11 +37,9 @@ const controller = {
     try {
       const bearer_id = req.app.locals.credentials.bearer_id;
       const kontestan_id = req.params.kontestan_id;
-      let tps_code = req.query.tps_code;
       const elections = await ElectionsService.countElectionByKontestanId(
         kontestan_id,
-        bearer_id,
-        String(tps_code)
+        bearer_id
       );
       success(res, "count election by kontestan_id", 200, elections);
       return;
@@ -126,11 +124,9 @@ const controller = {
     try {
       const kontestan_id = req.params.kontestan_id;
       const bearer_id = req.app.locals.credentials.bearer_id;
-      let query = req.query.tps_code;
       const eSummary = await ElectionsService.getCountElectionSummaryByKonId(
         bearer_id,
-        kontestan_id,
-        String(query)
+        kontestan_id
       );
       success(res, "find election by tps summary", 200, eSummary);
       return;
