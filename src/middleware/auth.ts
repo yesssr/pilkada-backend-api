@@ -3,34 +3,34 @@ import { comparePass, createToken, success, verifyToken } from "../utils/utils";
 import { UserTokenService } from "../service/user_tokens.services";
 import { UsersService } from "../service/users.services";
 import { AuthService } from "../service/auth.services";
-import { localError } from "./error";
+import { SendError } from "./error";
 
 const controller = {
   register: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, name, bearer_id, phone, role_id, password, token } =
-        req.body;
-      const data = {
-        email,
-        bearer_id,
-        name,
-        phone,
-        role_id,
-        password,
-      };
+      const { email, name, bearer_id, phone, password, token } = req.body;
+
       let checkToken = await UserTokenService.checkStatusToken(token);
       if (!checkToken) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "token not registered !";
         err.statusCode = 400;
         throw err;
       }
       if (checkToken?.status !== "available") {
-        let err = new localError();
+        let err = new SendError();
         err.message = "token already used !";
         err.statusCode = 400;
         throw err;
       }
+      const data = {
+        email,
+        bearer_id,
+        name,
+        phone,
+        role_id: checkToken.role_id,
+        password,
+      };
       const user = await UsersService.save(data);
       const user_token = await UserTokenService.addUserIdToToken(
         user.id,
@@ -48,14 +48,14 @@ const controller = {
       const { email, password } = req.body;
       const find = await AuthService.getByUsersCredentials(email);
       if (!find) {
-        let err = new localError();
+        let err = new SendError();
         err.statusCode = 404;
         err.message = "email not registered !";
         throw err;
       }
       const isMatch = await comparePass(password!, find.password!);
       if (!isMatch) {
-        let err = new localError();
+        let err = new SendError();
         err.statusCode = 401;
         err.message = "wrong password !";
         throw err;
@@ -82,12 +82,18 @@ const controller = {
     try {
       const authorization = req.headers.authorization?.split(" ")[1];
       if (!authorization) {
-        let err = new localError();
+        let err = new SendError();
         err.statusCode = 401;
         err.message = "invalid credentials !";
         throw err;
       }
       const payload = verifyToken(authorization);
+      if (!payload) {
+        let err = new SendError();
+        err.statusCode = 401;
+        err.message = "invalid credentials !";
+        throw err;
+      }
       req.app.locals.credentials = payload;
       next();
       return;

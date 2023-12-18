@@ -1,29 +1,31 @@
 import { KontestanModel } from "../model/kontestan";
 
 export class KontestanService {
-  static getAllKontestan = (bearer_id: number) => {
+  static getAllKontestan = (bearer_id: string) => {
     return KontestanModel.query()
       .select(
         "kontestan.id",
         "kontestan.service_id",
         "kontestan.user_id",
-        "kontestan.bearer_id",
-        "bearers.name as bearer",
-        "users.name as kontestan",
-        "kontestan_period.service_name as period",
-        "kontestan.date_start",
+        "users.name as user",
+        "users.bearer_id",
+        "users:bearers.name as bearer",
+        // "kontestan_period.service_name as period",
+        // "kontestan.date_start",
         "kontestan.banner",
-        "kontestan.title",
+        "kontestan.title as kontestan",
         "kontestan.slug",
         "kontestan.description",
-        "kontestan.url",
-        "status_kontestan.en as status",
-        "kontestan.created_by",
+        "kontestan.status",
+        "created.email as created_by",
+        "users.photo as url",
         "kontestan.created_at",
         "kontestan.updated_at"
       )
-      .joinRelated("[users, kontestan_period, status_kontestan, bearers]")
-      .where("kontestan.bearer_id", bearer_id);
+      .joinRelated("[users, created]")
+      .joinRelated("users.bearers")
+      .where("users.bearer_id", bearer_id)
+      .andWhere("users.is_deleted", false);
   };
 
   static getByKontestanId = (id: string, bearer_id: number) => {
@@ -32,8 +34,8 @@ export class KontestanService {
         "kontestan.id",
         "kontestan.service_id",
         "kontestan.user_id",
-        "kontestan.bearer_id",
-        "bearers.name as bearer",
+        "users.bearer_id",
+        "users:bearers.name as bearer",
         "users.name as kontestan",
         "kontestan_period.service_name as period",
         "kontestan.date_start",
@@ -42,32 +44,29 @@ export class KontestanService {
         "kontestan.slug",
         "kontestan.description",
         "kontestan.url",
-        "status_kontestan.en as status",
+        "kontestan.status",
         "kontestan.created_by",
         "kontestan.created_at",
         "kontestan.updated_at"
       )
-      .joinRelated("[users, kontestan_period, status_kontestan, bearers]")
+      .joinRelated("[users, kontestan_period]")
+      .joinRelated("users.bearers")
       .where("kontestan.id", id)
-      .andWhere("kontestan.bearer_id", bearer_id)
+      .andWhere("users.bearer_id", bearer_id)
       .first();
   };
 
   static save = (data: KontestanModel) => {
-    return KontestanModel.query()
-      .insert(data);
+    console.log(data.banner);
+    return KontestanModel.query().insert(data);
   };
 
   static update = (data: KontestanModel) => {
-    return KontestanModel.query()
-      .where("id", data.id)
-      .update(data);
+    return KontestanModel.query().where("id", data.id).update(data);
   };
 
   static delete = (id: string) => {
-    return KontestanModel.query()
-      .where("kontestan.id", id)
-      .delete();
+    return KontestanModel.query().where("kontestan.id", id).delete();
   };
 
   static getKontestanWithElections = (bearer_id: number) => {
@@ -76,8 +75,8 @@ export class KontestanService {
         "kontestan.id",
         "kontestan.service_id",
         "kontestan.user_id",
-        "kontestan.bearer_id",
-        "bearers.name as bearer",
+        "users.bearer_id",
+        "users:bearers.name as bearer",
         "users.name as kontestan",
         "kontestan_period.service_name as period",
         "kontestan.date_start",
@@ -86,13 +85,14 @@ export class KontestanService {
         "kontestan.slug",
         "kontestan.description",
         "kontestan.url",
-        "status_kontestan.en as status",
+        "kontestan.status",
         "kontestan.created_by",
         "kontestan.created_at",
         "kontestan.updated_at"
       )
-      .joinRelated("[users, kontestan_period, status_kontestan, bearers]")
+      .joinRelated("[users, kontestan_period]")
+      .joinRelated("users.bearers")
       .modify("mod_get_elections")
-      .where("kontestan.bearer_id", bearer_id);
-  }
+      .where("users.bearer_id", bearer_id);
+  };
 }

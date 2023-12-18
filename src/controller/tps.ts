@@ -1,14 +1,27 @@
 import { Request, Response, NextFunction } from "express";
 import { TpsService } from "../service/tps.services";
 import { success } from "../utils/utils";
-import { localError } from "../middleware/error";
+import { SendError } from "../middleware/error";
 import { Tps } from "../model/tps";
+import { UsersService } from "../service/users.services";
 
 const controller = {
   findAllTps: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const bearer_id = req.app.locals.credentials.bearer_id;
-      const tps = await TpsService.getAllTps(bearer_id);
+      let bearer_id = req.app.locals.credentials.bearer_id;
+      let { limit, offset } = req.query;
+      console.log(req.query);
+      const tps = await TpsService.getAllTps(
+        bearer_id,
+        Number(limit),
+        Number(offset)
+      );
+      if (tps.length < 1) {
+        let err = new SendError();
+        err.message = "tps not found";
+        err.statusCode = 404;
+        throw err;
+      }
       success(res, "find all tps", 200, tps);
       return;
     } catch (error) {
@@ -16,18 +29,19 @@ const controller = {
     }
   },
 
-  findByIdTps: async (req: Request, res: Response, next: NextFunction) => {
+  searchTpsByName: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = req.params.id;
-      const bearer_id = req.app.locals.credentials.bearer_id;
-      const tps = await TpsService.getByTpsId(id, bearer_id);
-      if (!tps) {
-        let err = new localError();
+      let bearer_id = req.app.locals.credentials.bearer_id;
+      let name = req.query.name;
+      console.log(req.query);
+      const tps = await TpsService.searchTpsByName(bearer_id, String(name));
+      if (tps.length < 1) {
+        let err = new SendError();
         err.message = "tps not found";
         err.statusCode = 404;
         throw err;
       }
-      success(res, "find tps by id", 200, tps);
+      success(res, "find all tps", 200, tps);
       return;
     } catch (error) {
       next(error);
@@ -36,9 +50,11 @@ const controller = {
 
   createTps: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const bearer_id = req.app.locals.credentials.bearer_id;
+      const userCredentials = req.app.locals.credentials;
       const data: Tps = req.body;
-      data.bearer_id = bearer_id;
+      // console.log(data);
+      data.user_id = userCredentials.id;
+      data.bearer_id = userCredentials.bearer_id;
       const tps = await TpsService.save(data);
       success(res, "tps successfully created", 201, tps);
       return;
@@ -50,9 +66,13 @@ const controller = {
   updateTps: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id;
+      const userCredentials = req.app.locals.credentials;
       const data: Tps = req.body;
       data.id = id;
+      data.user_id = userCredentials.id;
+      data.bearer_id = userCredentials.bearer_id;
       const tps = await TpsService.update(data);
+      if (tps != 1) throw new SendError("Error updateing tps", 500);
       success(res, "success updated tps", 200, tps);
       return;
     } catch (error) {
@@ -63,23 +83,12 @@ const controller = {
   deleteTpsById: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = req.params.id;
-      const tps = await TpsService.deleteById(id);
-      success(res, "success delete tps", 200, tps);
-      return;
-    } catch (error) {
-      next(error);
-    }
-  },
+      const userCredentials = req.app.locals.credentials;
 
-  findTpsWithElections: async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const bearer_id = req.app.locals.credentials.bearer_id;
-      const elections = await TpsService.getTpsWithElections(bearer_id);
-      success(res, "find tps with list elections", 200, elections);
+      const tps = await TpsService.deleteById(id);
+      if (!tps) throw new SendError("Error deleting tps", 500);
+
+      success(res, "success delete tps", 200, tps);
       return;
     } catch (error) {
       next(error);

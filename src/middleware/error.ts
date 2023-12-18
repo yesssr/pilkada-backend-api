@@ -1,11 +1,12 @@
 import { Response, Request, NextFunction } from "express";
+import { TokenExpiredError } from "jsonwebtoken";
 import {
   ForeignKeyViolationError,
   UniqueViolationError,
   ValidationError,
 } from "objection";
 
-export class localError extends Error {
+export class SendError extends Error {
   statusCode!: number;
 
   constructor(message?: string, statusCode?: number) {
@@ -21,7 +22,6 @@ export function errorHandler(
   next: NextFunction
 ) {
   if (err) {
-    console.error(err.stack, err.message);
     if (err instanceof ValidationError) {
       let msg = err.message.split(",")[0];
       return res.status(err.statusCode).json({
@@ -30,6 +30,7 @@ export function errorHandler(
         message: msg,
       });
     }
+
     if (err instanceof UniqueViolationError) {
       return res.status(400).json({
         success: false,
@@ -37,6 +38,7 @@ export function errorHandler(
         message: `${err.columns} already used`,
       });
     }
+
     if (err instanceof ForeignKeyViolationError) {
       let msg = err.constraint.split("_");
       return res.status(400).json({
@@ -45,17 +47,30 @@ export function errorHandler(
         message: `${msg[1]} not available`,
       });
     }
-    if (err instanceof localError) {
+
+    if (err instanceof TokenExpiredError) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        message: err.message,
+      });
+    }
+
+    if (err instanceof SendError) {
       return res.status(err.statusCode).json({
         success: false,
         statusCode: err.statusCode,
         message: err.message,
       });
     }
-    return res.status(500).json({
-      success: false,
-      statusCode: 500,
-      message: err,
-    });
+
+    (() => {
+      console.log(err);
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: err,
+      });
+    })();
   }
 }

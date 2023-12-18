@@ -47,14 +47,12 @@ export class UserTokenService {
   };
 
   static deleteById = (id: string) => {
-    return UserTokens.query()
-      .where("id", id)
-      .delete();
+    return UserTokens.query().where("id", id).delete();
   };
 
   static checkStatusToken = (token: string) => {
     return UserTokens.query()
-      .select("user_tokens.status")
+      .select("status", "role_id")
       .where("token", token)
       .first();
   };

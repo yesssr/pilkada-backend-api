@@ -9,10 +9,12 @@ import { usersRouter } from "./users";
 import { rolesRouter } from "./roles";
 import { authRouter } from "./auth";
 import { tpsRouter } from "./tps";
+import { findAllBearers } from "../../controller/bearers";
 
 const router = Router();
 
 router.use("/auth", authRouter);
+router.get("/bearers", findAllBearers);
 router.use(authController.auth);
 router.use("/users", usersRouter);
 router.use("/token", tokenRouter);

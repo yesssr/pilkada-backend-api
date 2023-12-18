@@ -6,7 +6,7 @@ import {
   RelationMappings,
   RelationMappingsThunk,
 } from "objection";
-import { localError } from "../middleware/error";
+import { SendError } from "../middleware/error";
 import { KontestanModel } from "./kontestan";
 import { BaseModel } from "./basemodel";
 import { UsersModel } from "./users";
@@ -15,23 +15,13 @@ import { Tps } from "./tps";
 export class Elections extends BaseModel {
   poin!: number;
   type!: string;
+  photo!: string;
   kontestan_id!: string;
   user_id!: string;
   nik!: string;
   created_by!: string;
 
   static tableName: string = "elections";
-
-  async $beforeInsert() {
-    let duplicateCheck = await Elections.query()
-      .select("nik")
-      .where("nik", this.nik)
-      .first();
-
-    if (duplicateCheck) {
-      throw new localError("nik already used", 400);
-    }
-  }
 
   static jsonSchema: JSONSchema = {
     type: "object",
@@ -67,7 +57,7 @@ export class Elections extends BaseModel {
       modelClass: UsersModel,
 
       join: {
-        from: "elections.user_id",
+        from: "elections.created_by",
         to: "users.id",
       },
     },

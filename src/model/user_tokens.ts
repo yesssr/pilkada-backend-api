@@ -9,6 +9,7 @@ import { UsersModel } from "./users";
 
 export class UserTokens extends BaseModel {
   id!: number;
+  role_id!: string;
   user_id!: string;
   token!: string;
   status!: string;
@@ -22,6 +23,7 @@ export class UserTokens extends BaseModel {
       id: { type: "integer" },
       user_id: { type: "string" },
       token: { type: "string" },
+      role_id: { type: "string" },
     },
   };
 

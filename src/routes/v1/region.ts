@@ -1,5 +1,5 @@
 import { Response, Router, Request, NextFunction } from "express";
-import { localError } from "../../middleware/error";
+import { SendError } from "../../middleware/error";
 import { Provinces } from "../../model/provinces";
 import { Regencies } from "../../model/regencies";
 import { Districts } from "../../model/districts";
@@ -20,7 +20,7 @@ router.get(
       );
 
       if (provinces.length < 1) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "provinces not found";
         err.statusCode = 404;
         throw err;
@@ -43,7 +43,7 @@ router.get(
         .where("province_id", id);
 
       if (regencies.length < 1) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "regencies not found";
         err.statusCode = 404;
         throw err;
@@ -66,7 +66,7 @@ router.get(
         .where("regency_id", id);
 
       if (districts.length < 1) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "districts not found";
         err.statusCode = 404;
         throw err;
@@ -89,7 +89,7 @@ router.get(
         .where("district_id", id);
 
       if (villages.length < 1) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "villages not found";
         err.statusCode = 404;
         throw err;

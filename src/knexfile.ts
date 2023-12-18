@@ -12,6 +12,8 @@ const config: { [key: string]: Knex.Config } = {
       user: process.env.DEV_USERNAME,
       password: process.env.DEV_PASSWORD,
       database: process.env.DEV_DATABASE,
+      keepAlive: true,
+      enableKeepAlive: true,
     },
   },
 

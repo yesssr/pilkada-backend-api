@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { RoleService } from "../service/roles.services";
 import { success } from "../utils/utils";
-import { localError } from "../middleware/error";
+import { SendError } from "../middleware/error";
 import { RoleModel } from "../model/roles";
 
 const controller = {
@@ -20,7 +20,7 @@ const controller = {
       const id = req.params.id;
       const role = await RoleService.getByRoleId(id);
       if (!role) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "role not found";
         err.statusCode = 404;
       }

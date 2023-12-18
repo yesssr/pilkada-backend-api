@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { UserTokenService } from "../service/user_tokens.services";
 import { success } from "../utils/utils";
-import { localError } from "../middleware/error";
+import { SendError } from "../middleware/error";
 
 const controller = {
   findAllTokens: async (req: Request, res: Response, next: NextFunction) => {
@@ -34,7 +34,7 @@ const controller = {
       const id = req.params.id;
       const token = await UserTokenService.getByTokenId(id);
       if (!token) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "token not found";
         err.statusCode = 404;
         throw err;

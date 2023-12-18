@@ -4,19 +4,24 @@ import {
   RelationMappings,
   RelationMappingsThunk,
 } from "objection";
+import { v4 as uuidv4 } from "uuid";
 import { KontestanModel } from "./kontestan";
 import { BaseModel } from "./basemodel";
 import { UsersModel } from "./users";
 import { Tps } from "./tps";
 
 export class ElectionSummary extends BaseModel {
-  id!: string;
+  id?: string;
   user_id!: string;
   tps_code!: string;
   kontestan_id!: string;
+  summary!: number;
 
   static tableName: string = "election_summary";
 
+  $beforeInsert(): void {
+    this.id = uuidv4();
+  }
   static jsonSchema: JSONSchema = {
     type: "object",
     required: ["user_id", "tps_code", "kontestan_id", "summary"],
@@ -25,7 +30,7 @@ export class ElectionSummary extends BaseModel {
       user_id: { type: "string" },
       tps_code: { type: "string" },
       kontestan_id: { type: "string" },
-      summary: { type: "string" },
+      summary: { type: "integer" },
     },
   };
 

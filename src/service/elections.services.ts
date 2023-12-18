@@ -1,93 +1,109 @@
 import { ElectionSummary } from "../model/election_summary";
 import { Elections } from "../model/election";
 
-export interface ElectionsImport {
-  poin: number;
-  type: string;
-  kontestan_id: string;
-  user_id: string;
-  created_by: string;
-}
-
 export class ElectionsService {
+  static getDataElection = (user_id: string) => {
+    return Elections.query()
+      .select(
+        "kontestan.id",
+        "kontestan.service_id",
+        "kontestan.bearer_id",
+        "kontestan:bearers.name as bearer",
+        "kontestan_period.service_name as period",
+        "kontestan.date_start",
+        "kontestan.banner",
+        "kontestan.title as kontestan",
+        "kontestan.description",
+        "kontestan.url",
+        "kontestan.status",
+        "kontestan.created_at",
+        "kontestan.updated_at"
+      )
+      .leftJoinRelated("kontestan")
+      .joinRelated("kontestan.bearers");
+  };
+
   static addElection = (data: Elections) => {
     return Elections.query().insert(data);
   };
 
-  static countElectionByKontestanId = async (kontestan_id: string, bearer_id: number) => {
-    return Elections.query()
-      .select(
-        "kontestan_id",
-        "tps_code",
-        "kontestan:users.name as kontestan",
-        "tps.name as tps"
-      )
-      .count("elections.id", { as: "summary" })
-      .from("elections")
-      .where("kontestan_id", kontestan_id)
-      .andWhere("kontestan.bearer_id", bearer_id)
+  static countElectionByKontestanId = async (
+    kontestan_id: string,
+    bearer_id: number,
+    tps_code?: string
+  ) => {
+    let query = Elections.query()
+      .count("elections.id as summary")
+      .groupBy("elections.kontestan_id")
+      .select("elections.kontestan_id", "kontestan.title as kontestan")
+      .joinRelated("[tps, kontestan]")
+      .where("tps.is_deleted", false)
       .andWhere("tps.bearer_id", bearer_id)
-      .groupBy("kontestan_id", "tps_code")
-      .joinRelated("[kontestan, tps]")
-      .joinRelated("kontestan.users");
+      .andWhere("elections.kontestan_id", kontestan_id);
+
+    if (tps_code) query.andWhere("elections.tps_code", tps_code);
+    return query;
   };
 
-  static countElectionByTpsCode = async (tps_code: string, bearer_id: number) => {
-    return Elections.query()
-      .select(
-        "kontestan_id",
-        "tps_code",
-        "kontestan:users.name as kontestan",
-        "tps.name as tps"
-      )
-      .count("elections.id", { as: "summary" })
-      .from("elections")
-      .where("tps_code", tps_code)
-      .groupBy("kontestan_id", "tps_code")
-      .andWhere("kontestan.bearer_id", bearer_id)
-      .andWhere("tps.bearer_id", bearer_id)
-      .joinRelated("[kontestan, tps]")
-      .joinRelated("kontestan.users");
-  };
-
-  static countElectionByKontestanIdAndTpsCode = async (
+  static detailElectionsByKontestanIdAndTpsCode = async (
     kontestan_id: string,
     tps_code: string,
-    bearer_id: number
+    bearer_id: number,
+    limit: number,
+    offset: number
   ) => {
     return Elections.query()
       .select(
-        "kontestan_id",
-        "tps_code",
-        "kontestan:users.name as kontestan",
-        "tps.name as tps"
+        "elections.id",
+        "elections.kontestan_id",
+        "elections.tps_code",
+        "elections.created_by as auditor_id",
+        "user.name as auditor",
+        "elections.nik",
+        "elections.name",
+        "elections.address",
+        "elections.photo",
+        "elections.created_at",
+        "elections.updated_at"
       )
-      .count("elections.id", { as: "summary" })
-      .from("elections")
-      .where("kontestan_id", kontestan_id)
-      .andWhere("kontestan.bearer_id", bearer_id)
+      .joinRelated("[tps, user]")
+      .where("tps.is_deleted", false)
       .andWhere("tps.bearer_id", bearer_id)
-      .andWhere("tps_code", tps_code)
-      .groupBy("kontestan_id", "tps_code")
-      .joinRelated("[kontestan, tps]")
-      .joinRelated("kontestan.users");
+      .andWhere("tps.code", tps_code)
+      .andWhere("elections.kontestan_id", kontestan_id)
+      .orderBy("elections.name")
+      .limit(limit)
+      .offset(offset);
   };
 
-  static countAllElections = (bearer_id: number) => {
+  static searchParticipantByName = async (
+    kontestan_id: string,
+    tps_code: string,
+    bearer_id: number,
+    name?: string
+  ) => {
     return Elections.query()
       .select(
-        "kontestan_id",
-        "tps_code",
-        "kontestan:users.name as kontestan",
-        "tps.name as tps"
+        "elections.id",
+        "elections.kontestan_id",
+        "elections.tps_code",
+        "elections.created_by as auditor_id",
+        "user.name as auditor",
+        "elections.nik",
+        "elections.name",
+        "elections.address",
+        "elections.photo",
+        "elections.created_at",
+        "elections.updated_at"
       )
-      .count("elections.id", { as: "summary" })
-      .from("elections")
-      .where("kontestan.bearer_id", bearer_id)
+      .joinRelated("[tps, user]")
+      .where("tps.is_deleted", false)
       .andWhere("tps.bearer_id", bearer_id)
-      .groupBy("kontestan_id", "tps_code")
-      .joinRelated("[kontestan, tps]")
-      .joinRelated("kontestan.users");
+      .andWhere("tps.code", tps_code)
+      .andWhere("elections.kontestan_id", kontestan_id)
+      .andWhereLike("elections.name", `%${name}%`)
+      .orderBy("elections.name")
+      .limit(7);
   };
 
   /**
@@ -96,38 +112,132 @@ export class ElectionsService {
    * ========================
    */
 
-  static getElectionSummary = (bearer_id: number) => {
+  static detailVoteByKontestanIdAndTpsCode = async (
+    kontestan_id: string,
+    tps_code: string,
+    bearer_id: number
+  ) => {
     return ElectionSummary.query()
+      .count("election_summary.id as summary")
+      .groupBy(
+        "election_summary.kontestan_id",
+        "election_summary.tps_code",
+        "election_summary.user_id"
+      )
       .select(
         "election_summary.id",
-        "election_summary.user_id",
-        "election_summary.tps_code",
         "election_summary.kontestan_id",
-        "users.name as auditor",
+        "election_summary.tps_code",
+        "election_summary.user_id as auditor_id",
         "tps.name as tps",
-        "kontestan:users.name as kontestan",
-        "election_summary.summary"
+        "users.name as auditor",
+        "users.photo",
+        "election_summary.created_at",
+        "election_summary.updated_at"
       )
-      .joinRelated("[users, kontestan, tps]")
-      .where("users.bearer_id", bearer_id)
-      .andWhere("kontestan.bearer_id", bearer_id)
-      .joinRelated("kontestan.users");
+      .joinRelated("[tps, users]")
+      .where("tps.is_deleted", false)
+      .andWhere("tps.bearer_id", bearer_id)
+      .andWhere("users.is_deleted", false)
+      .andWhere("election_summary.tps_code", tps_code)
+      .andWhere("election_summary.kontestan_id", kontestan_id);
   };
 
-  static checkSummary = (data: ElectionSummary) => {
+  static searchAuditorByName = async (
+    kontestan_id: string,
+    tps_code: string,
+    bearer_id: number,
+    name?: string
+  ) => {
     return ElectionSummary.query()
-      .select("id", "user_id", "tps_code", "kontestan_id")
-      .where("user_id", data.user_id)
-      .andWhere("tps_code", data.tps_code)
-      .andWhere("kontestan_id", data.kontestan_id)
-      .first();
+      .count("election_summary.id as summary")
+      .groupBy(
+        "election_summary.kontestan_id",
+        "election_summary.tps_code",
+        "election_summary.user_id"
+      )
+      .select(
+        "election_summary.id",
+        "election_summary.kontestan_id",
+        "election_summary.tps_code",
+        "election_summary.user_id as auditor_id",
+        "tps.name as tps",
+        "users.name as auditor",
+        "users.photo",
+        "election_summary.created_at",
+        "election_summary.updated_at"
+      )
+      .joinRelated("[tps, users]")
+      .where("tps.is_deleted", false)
+      .andWhere("tps.bearer_id", bearer_id)
+      .andWhere("users.is_deleted", false)
+      .andWhere("election_summary.tps_code", tps_code)
+      .andWhere("election_summary.kontestan_id", kontestan_id)
+      .andWhereILike("users.name", `%${name}%`)
+      .orderBy("users.name")
+      .limit(7);
+  };
+
+  static getESummaryByKonId = (kontestan_id: string) => {
+    return ElectionSummary.query()
+      .count("election_summary.id as summary")
+      .groupBy("election_summary.kontestan_id", "election_summary.tps_code")
+      .select(
+        "election_summary.user_id as auditor_id",
+        "election_summary.tps_code",
+        "election_summary.kontestan_id",
+        "tps.name as tps",
+        "kontestan.title as kontestan"
+      )
+      .joinRelated("[kontestan, tps]")
+      .where("tps.is_deleted", false)
+      .andWhere("election_summary.kontestan_id", kontestan_id)
+      .orderBy("tps.name");
+  };
+
+  static getElectionSummaryV2 = (bearer_id: number) => {
+    return ElectionSummary.query()
+      .count("election_summary.id as summary")
+      .groupBy("election_summary.kontestan_id")
+      .select(
+        "election_summary.user_id as auditor_id",
+        "election_summary.kontestan_id",
+        "kontestan.title as kontestan",
+        "kontestan.banner as photo"
+      )
+      .joinRelated("[kontestan, tps]")
+      .joinRelated("kontestan.users")
+      .where("tps.is_deleted", false)
+      .andWhere("tps.bearer_id", bearer_id)
+      .andWhere("kontestan:users.bearer_id", bearer_id)
+      .orderBy("summary", "DESC");
+  };
+
+  static getCountElectionSummaryByKonId = (
+    bearer_id: number,
+    kontestan_id: string,
+    tps_code?: string
+  ) => {
+    let query = ElectionSummary.query()
+      .count("election_summary.id as summary")
+      .groupBy("election_summary.kontestan_id")
+      .select(
+        "election_summary.user_id as auditor_id",
+        "election_summary.kontestan_id",
+        "kontestan.title as kontestan"
+      )
+      .joinRelated("[kontestan, tps]")
+      .joinRelated("kontestan.users")
+      .where("tps.is_deleted", false)
+      .andWhere("tps.bearer_id", bearer_id)
+      .andWhere("election_summary.kontestan_id", kontestan_id)
+      .andWhere("kontestan:users.bearer_id", bearer_id);
+
+    if (tps_code) query.andWhere("election_summary.tps_code", tps_code);
+    return query;
   };
 
   static saveElectionSummary = async (data: ElectionSummary) => {
     return ElectionSummary.query().insert(data);
-  };
-
-  static updateElectionSummary = (data: ElectionSummary) => {
-    return ElectionSummary.query().where("id", data.id).update(data);
   };
 }

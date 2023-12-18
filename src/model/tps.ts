@@ -17,9 +17,11 @@ import { Elections } from "./election";
 import { Villages } from "./villages";
 import { UsersModel } from "./users";
 import { Bearers } from "./bearers";
+import { ElectionSummary } from "./election_summary";
 
 export class Tps extends BaseModel {
   id!: string;
+  user_id!: string;
   code!: string;
   bearer_id!: number;
   is_deleted!: boolean;
@@ -57,7 +59,6 @@ export class Tps extends BaseModel {
       "address",
       "latitude",
       "longitude",
-      "status",
     ],
     properties: {
       id: { type: "string" },
@@ -87,7 +88,7 @@ export class Tps extends BaseModel {
         to: "bearers.id",
       },
     },
-    
+
     users: {
       relation: Model.BelongsToOneRelation,
       modelClass: UsersModel,
@@ -95,6 +96,16 @@ export class Tps extends BaseModel {
       join: {
         from: "tps.user_id",
         to: "users.id",
+      },
+    },
+
+    auditor: {
+      relation: Model.HasManyRelation,
+      modelClass: UsersModel,
+
+      join: {
+        from: "tps.code",
+        to: "users.tps_code",
       },
     },
 
@@ -161,6 +172,20 @@ export class Tps extends BaseModel {
         to: "elections.tps_code",
       },
     },
+
+    election_s: {
+      relation: Model.HasManyRelation,
+      modelClass: ElectionSummary,
+
+      join: {
+        from: "tps.code",
+        // through: {
+        //   from: "elections.tps_code",
+        //   to: "elections.kontestan_id",
+        // },
+        to: "election_summary.tps_code",
+      },
+    },
   });
 
   static modifiers: Modifiers<AnyQueryBuilder> = {
@@ -176,6 +201,22 @@ export class Tps extends BaseModel {
             .joinRelated("kontestan")
             .joinRelated("kontestan.users");
         });
+    },
+
+    mod_get_auditor(query, bearer_id) {
+      query.withGraphFetched("auditor").modifyGraph("auditor", (builder) => {
+        builder
+          .select(
+            "users.id",
+            "users.name",
+            "users.bearer_id",
+            "bearers.codename"
+          )
+          .from("users")
+          .joinRelated("bearers")
+          .where("users.is_deleted", false)
+          .andWhere("users.bearer_id", bearer_id);
+      });
     },
   };
 }

@@ -17,11 +17,11 @@ import { Bearers } from "./bearers";
 
 export class KontestanModel extends BaseModel {
   id!: string;
-  bearer_id!: number;
   slug!: string;
   title!: string;
   status!: number;
   created_by!: string;
+  banner?: string;
 
   static tableName: string = "kontestan";
   $beforeInsert() {
@@ -38,16 +38,7 @@ export class KontestanModel extends BaseModel {
 
   static jsonSchema: JSONSchema = {
     type: "object",
-    required: [
-      "service_id",
-      "user_id",
-      "bearer_id",
-      "banner",
-      "title",
-      "description",
-      "url",
-      "created_by",
-    ],
+    required: ["user_id", "banner", "title", "description", "created_by"],
     properties: {
       id: { type: "string" },
       service_id: { type: "string" },
@@ -65,22 +56,22 @@ export class KontestanModel extends BaseModel {
   };
 
   static relationMappings: RelationMappings | RelationMappingsThunk = () => ({
-    bearers: {
-      relation: Model.BelongsToOneRelation,
-      modelClass: Bearers,
-
-      join: {
-        from: "kontestan.bearer_id",
-        to: "bearers.id",
-      },
-    },
-
     users: {
       relation: Model.BelongsToOneRelation,
       modelClass: UsersModel,
 
       join: {
         from: "kontestan.user_id",
+        to: "users.id",
+      },
+    },
+
+    created: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: UsersModel,
+
+      join: {
+        from: "kontestan.created_by",
         to: "users.id",
       },
     },

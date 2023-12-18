@@ -5,13 +5,15 @@ import {
   RelationMappingsThunk,
 } from "objection";
 import { v4 as uuidv4 } from "uuid";
-import { localError } from "../middleware/error";
+import { SendError } from "../middleware/error";
 import { StatusUser } from "./status_user";
 import { UserTokens } from "./user_tokens";
 import { hashPass } from "../utils/utils";
 import { BaseModel } from "./basemodel";
 import { Bearers } from "./bearers";
 import { RoleModel } from "./roles";
+import { Tps } from "./tps";
+import { KontestanModel } from "./kontestan";
 
 export class UsersModel extends BaseModel {
   id!: string;
@@ -19,7 +21,7 @@ export class UsersModel extends BaseModel {
   phone!: string;
   name!: string;
   email!: string;
-  role_id!: number;
+  role_id!: string;
   role!: string;
   slug!: string;
   status!: number;
@@ -37,7 +39,7 @@ export class UsersModel extends BaseModel {
       .first();
 
     if (check) {
-      let err = new localError();
+      let err = new SendError();
       err.message = "email already registered !";
       err.statusCode = 400;
       throw err;
@@ -56,7 +58,7 @@ export class UsersModel extends BaseModel {
         .first();
 
       if (check && check.email !== this.email) {
-        let err = new localError();
+        let err = new SendError();
         err.message = "email already registered !";
         err.statusCode = 400;
         throw err;
@@ -77,7 +79,7 @@ export class UsersModel extends BaseModel {
       password: { type: "string", minLength: 8 },
       remember_token: { type: "string" },
       photo: { type: "string" },
-      role_id: { type: "integer" },
+      role_id: { type: "string" },
       is_deleted: { type: "boolean" },
       status: { type: "boolean" },
       notification_token: { type: "string" },
@@ -85,6 +87,16 @@ export class UsersModel extends BaseModel {
   };
 
   static relationMappings: RelationMappings | RelationMappingsThunk = () => ({
+    kontestan: {
+      relation: Model.BelongsToOneRelation,
+      modelClass: KontestanModel,
+
+      join: {
+        from: "users.id",
+        to: "kontestan.user_id",
+      },
+    },
+
     bearers: {
       relation: Model.BelongsToOneRelation,
       modelClass: Bearers,
