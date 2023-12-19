@@ -135,6 +135,26 @@ const controller = {
     }
   },
 
+  findESummaryKontGroupByTps: async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const kontestan_id = req.params.kontestan_id;
+      const bearer_id = req.app.locals.credentials.bearer_id;
+      const eSummary =
+        await ElectionsService.getCountElectionSummaryByKonIdGroupByTps(
+          bearer_id,
+          kontestan_id
+        );
+      success(res, "find election group by tps summary", 200, eSummary);
+      return;
+    } catch (error) {
+      next(error);
+    }
+  },
+
   findESummaryByTpsCodeAndKontId: async (
     req: Request,
     res: Response,

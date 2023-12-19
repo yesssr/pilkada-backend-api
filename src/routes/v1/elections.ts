@@ -5,6 +5,10 @@ import { uploadImage } from "../../helper/multer";
 const router = Router();
 
 router.get("/summary/tps/:kontestan_id", elections.findESummaryByTpsKont);
+router.get(
+  "/summary/group-by-tps/:kontestan_id",
+  elections.findESummaryKontGroupByTps
+);
 router.get("/summary", elections.findElectionSummary);
 
 router.get("/kontestan/:kontestan_id", elections.countElectionByKontestanId);

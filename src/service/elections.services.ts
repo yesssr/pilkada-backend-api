@@ -219,7 +219,28 @@ export class ElectionsService {
       .select(
         "election_summary.user_id as auditor_id",
         "election_summary.kontestan_id",
-        "kontestan.title as kontestan"
+        "kontestan.title as kontestan",
+        "tps.name as tps"
+      )
+      .joinRelated("[kontestan, tps]")
+      .joinRelated("kontestan.users")
+      .where("tps.is_deleted", false)
+      .andWhere("tps.bearer_id", bearer_id)
+      .andWhere("election_summary.kontestan_id", kontestan_id)
+      .andWhere("kontestan:users.bearer_id", bearer_id);
+  };
+  static getCountElectionSummaryByKonIdGroupByTps = (
+    bearer_id: number,
+    kontestan_id: string
+  ) => {
+    return ElectionSummary.query()
+      .count("election_summary.id as summary")
+      .groupBy("election_summary.kontestan_id", "election_summary.tps_code")
+      .select(
+        "election_summary.user_id as auditor_id",
+        "election_summary.kontestan_id",
+        "kontestan.title as kontestan",
+        "tps.name as tps"
       )
       .joinRelated("[kontestan, tps]")
       .joinRelated("kontestan.users")
