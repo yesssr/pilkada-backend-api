@@ -105,6 +105,18 @@ const controller = {
             next(error);
         }
     }),
+    findESummaryKontGroupByTps: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const kontestan_id = req.params.kontestan_id;
+            const bearer_id = req.app.locals.credentials.bearer_id;
+            const eSummary = yield elections_services_1.ElectionsService.getCountElectionSummaryByKonIdGroupByTps(bearer_id, kontestan_id);
+            (0, utils_1.success)(res, "find election group by tps summary", 200, eSummary);
+            return;
+        }
+        catch (error) {
+            next(error);
+        }
+    }),
     findESummaryByTpsCodeAndKontId: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { kontestan_id, tps_code } = req.params;

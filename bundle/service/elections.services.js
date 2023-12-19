@@ -118,7 +118,19 @@ ElectionsService.getCountElectionSummaryByKonId = (bearer_id, kontestan_id) => {
     return election_summary_1.ElectionSummary.query()
         .count("election_summary.id as summary")
         .groupBy("election_summary.kontestan_id")
-        .select("election_summary.user_id as auditor_id", "election_summary.kontestan_id", "kontestan.title as kontestan")
+        .select("election_summary.user_id as auditor_id", "election_summary.kontestan_id", "kontestan.title as kontestan", "tps.name as tps")
+        .joinRelated("[kontestan, tps]")
+        .joinRelated("kontestan.users")
+        .where("tps.is_deleted", false)
+        .andWhere("tps.bearer_id", bearer_id)
+        .andWhere("election_summary.kontestan_id", kontestan_id)
+        .andWhere("kontestan:users.bearer_id", bearer_id);
+};
+ElectionsService.getCountElectionSummaryByKonIdGroupByTps = (bearer_id, kontestan_id) => {
+    return election_summary_1.ElectionSummary.query()
+        .count("election_summary.id as summary")
+        .groupBy("election_summary.kontestan_id", "election_summary.tps_code")
+        .select("election_summary.user_id as auditor_id", "election_summary.kontestan_id", "kontestan.title as kontestan", "tps.name as tps")
         .joinRelated("[kontestan, tps]")
         .joinRelated("kontestan.users")
         .where("tps.is_deleted", false)

@@ -7,6 +7,7 @@ const multer_1 = require("../../helper/multer");
 const router = (0, express_1.Router)();
 exports.electionsRouter = router;
 router.get("/summary/tps/:kontestan_id", elections_1.elections.findESummaryByTpsKont);
+router.get("/summary/group-by-tps/:kontestan_id", elections_1.elections.findESummaryKontGroupByTps);
 router.get("/summary", elections_1.elections.findElectionSummary);
 router.get("/kontestan/:kontestan_id", elections_1.elections.countElectionByKontestanId);
 router.get("/kontestan/:kontestan_id/tps/:tps_code", elections_1.elections.findDetailElectionSingle);
