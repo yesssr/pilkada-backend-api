@@ -6,12 +6,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadImage = void 0;
 const multer_1 = __importDefault(require("multer"));
 const error_1 = require("../middleware/error");
+const utils_1 = require("../utils/utils");
 const multerDir = (directory) => {
     const storage = multer_1.default.diskStorage({
         destination: function (req, file, cb) {
             cb(null, directory);
         },
         filename: function (req, file, cb) {
+            const fileName = file.originalname +
+                "-" +
+                req.app.locals.credentials.id +
+                "-" +
+                (0, utils_1.getUniqueNumber)();
+            file.originalname = fileName;
+            console.log(file.originalname);
             cb(null, file.originalname);
         },
     });

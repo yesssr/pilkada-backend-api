@@ -62,7 +62,7 @@ const controller = {
             const isMatch = yield (0, utils_1.comparePass)(password, find.password);
             if (!isMatch) {
                 let err = new error_1.SendError();
-                err.statusCode = 400;
+                err.statusCode = 401;
                 err.message = "wrong password !";
                 throw err;
             }
