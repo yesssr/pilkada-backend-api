@@ -1,5 +1,6 @@
 import multer from "multer";
 import { SendError } from "../middleware/error";
+import { getUniqueNumber } from "../utils/utils";
 
 const multerDir = (directory: string) => {
   const storage = multer.diskStorage({
@@ -8,6 +9,14 @@ const multerDir = (directory: string) => {
     },
 
     filename: function (req: any, file: any, cb: any) {
+      const fileName =
+        file.originalname +
+        "-" +
+        req.app.locals.credentials.id +
+        "-" +
+        getUniqueNumber();
+      file.originalname = fileName;
+      console.log(file.originalname);
       cb(null, file.originalname);
     },
   });
