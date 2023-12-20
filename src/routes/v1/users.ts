@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { users } from "../../controller/users";
+import { uploadImage } from "../../helper/multer";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ router.get("/profile", users.getUserProfile);
 router
   .route("/:id")
   .get(users.findByIdUser)
-  .put(users.updateUser)
+  .put(uploadImage("./uploads/users/").single("file"), users.updateUser)
   .delete(users.deleteUserById);
 
 export { router as usersRouter };

@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
+import path from "path";
+import fs from "fs";
+
 import { UsersService } from "../service/users.services";
-import { createToken, success } from "../utils/utils";
+import { comparePass, createToken, success } from "../utils/utils";
 import { SendError } from "../middleware/error";
 import { UsersModel } from "../model/users";
 
@@ -61,13 +64,59 @@ const controller = {
 
   updateUser: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = req.params.id;
-      const data: UsersModel = req.body;
-      data.id = id;
-      const user = await UsersService.update(data);
-      success(res, "success updated user", 200, user);
+      const credentials = req.app.locals.credentials;
+      const image = req.file;
+      const data = req.body;
+      let checkUser = await UsersService.getByIdUser(credentials.id);
+
+      const isMatch = await comparePass(data.password!, checkUser?.password!);
+      if (!isMatch) {
+        let err = new SendError();
+        err.statusCode = 400;
+        err.message = "wrong password !";
+        throw err;
+      }
+
+      if (data.new_pass && data.conf_new_pass) {
+        console.log(data.new_pass);
+        if (data.new_pass != data.conf_new_pass) {
+          throw new SendError("New Pass is not match with Confirm Pass", 400);
+        }
+        data.password = data.conf_new_pass;
+        // console.log(data.password);
+      }
+
+      if (!image && !data.photo) throw new SendError("photo is required", 400);
+
+      if (image && data.photo != "default.png") {
+        let filename = path.join(
+          __dirname,
+          `../../uploads/users/${data.photo}`
+        );
+
+        fs.unlink(filename, (err) => {
+          if (err) {
+            console.log(err);
+            throw new SendError("Error processing file", 501);
+          }
+        });
+      }
+
+      if (image) data.photo = image?.originalname;
+
+      data.id = credentials.id;
+      data.role_id = `${credentials.role_id}`;
+      data.bearer_id = credentials.bearer_id;
+      console.log(data);
+
+      delete data.new_pass;
+      delete data.conf_new_pass;
+
+      const users = await UsersService.update(data);
+      success(res, "success updated users", 200, users);
       return;
     } catch (error) {
+      console.log(error);
       next(error);
     }
   },
